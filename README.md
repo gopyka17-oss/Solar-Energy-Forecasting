@@ -1,434 +1,251 @@
-<div align="center">
+# ☀️ Solar Energy Forecasting Using Machine Learning
 
-# ☀️ Weather-Driven Solar Energy Forecasting Using Machine Learning
+### A Comparative Study of Linear Regression and Random Forest with Chronological Evaluation
 
-### End-to-End Time-Series Forecasting and Renewable Energy Analytics Project
+This project develops and evaluates machine learning models for predicting solar energy generation using historical weather observations and temporal information.
 
-![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)
-![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-black?logo=pandas)
-![NumPy](https://img.shields.io/badge/NumPy-Scientific%20Computing-blue?logo=numpy)
-![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-Machine%20Learning-orange?logo=scikitlearn)
-![Time Series](https://img.shields.io/badge/Time-Series%20Forecasting-purple)
-![License](https://img.shields.io/badge/License-MIT-green)
+The study compares **Linear Regression** and **Random Forest Regression** against a simple baseline, using a chronological train-test split to evaluate model performance on later observations.
 
-</div>
+**Best-performing model: Random Forest Regression (R² = 0.9011, RMSE = 329.21 Wh).**
 
 ---
 
-## 📌 Project Overview
+## 1. Project Overview
 
-Solar energy production changes continuously because of weather conditions, seasonal patterns, daylight duration, and time of day.
+Solar energy generation is influenced by environmental conditions such as sunlight intensity, temperature, rainfall, cloud coverage, and daylight duration.
 
-This project develops an end-to-end machine learning pipeline to forecast solar energy output using historical solar production and weather data recorded at 15-minute intervals.
+Accurate estimation of solar energy output can support renewable energy planning, resource management, and data-driven decision-making.
 
-The project covers:
+This project investigates how effectively supervised machine learning algorithms can estimate solar energy generation from weather-related measurements.
 
-- Data cleaning
-- Exploratory Data Analysis
-- Time-based feature engineering
-- Lag and rolling features
-- Chronological train-test splitting
-- Regression model comparison
-- Forecast visualization
-- Feature importance analysis
-- Renewable energy planning insights
+### Objectives
 
----
+- Explore historical solar energy and weather data.
+- Clean and preprocess timestamped observations.
+- Investigate relationships between environmental variables and solar energy generation.
+- Develop Linear Regression and Random Forest prediction models.
+- Evaluate model performance using a chronological holdout dataset.
+- Compare the models against a training-mean baseline.
+- Analyze prediction errors and important explanatory features.
+- Demonstrate a hypothetical January 2026 energy-generation scenario.
 
-## ⭐ Project Highlights
+## 2. Dataset
 
-- Analysed approximately **196,000 time-series observations**
-- Used weather and time variables to forecast solar output
-- Created lag features for previous 15-minute, 1-hour, and 24-hour energy production
-- Created rolling averages to capture short-term and daily trends
-- Compared three regression models
-- Achieved an **R² score of 0.9602**
-- Saved the best-performing model for future deployment
-- Generated forecast and feature-importance visualizations
+The dataset contains historical solar energy and weather measurements recorded between **January 2017 and August 2022**.
 
----
-
-## 🎯 Project Objective
-
-The main objective is to predict:
-
-```text
-Energy Captured [Wh]
-```
-
-using variables such as:
-
-- Sunlight Intensity
-- Temperature
-- Rainfall
-- Cloud Coverage
-- Daylight Length
-- Hour
-- Month
-- Previous Energy Output
-- Rolling Average Energy
-
-The predictions can support:
-
-- Energy-storage planning
-- Grid balancing
-- Renewable-energy scheduling
-- Capacity estimation
-- Operational decision-making
-
----
-
-## 📂 Dataset
-
-**Source file:** `solar_weather - Raw - Assignment Oct 2025-1.xlsx`
-
-The dataset contains approximately:
-
-```text
-196,777 rows
-7 original columns
-```
-
-### Original variables
-
-| Variable | Description |
+| Dataset property | Description |
 |---|---|
-| Time | Date and time of observation |
-| Energy Captured[Wh] | Solar energy output and prediction target |
-| Sun Light Intensity (W/m2) | Measured sunlight intensity |
+| Original observations | 196,777 |
+| Cleaned observations | 196,768 |
+| Number of original columns | 7 |
+| Temporal resolution | Predominantly 15-minute intervals |
+| Target variable | Energy Captured [Wh] |
+| Data format | Excel (.xlsx) |
+
+### Original Dataset Features
+
+| Feature | Description |
+|---|---|
+| Time | Timestamp of observation |
+| Energy Captured[Wh] | Solar energy captured, measured in Wh |
+| Sun Light Intensity (W/m2) | Measured solar radiation intensity |
 | Temperature | Recorded temperature |
-| 1 Hour Rain Fall | Rainfall during the previous hour |
-| Cloud Coverage | Percentage of cloud coverage |
-| Length of Day_Light | Daylight duration |
+| 1 Hour Rain Fall | Rainfall measurement |
+| Cloud Coverage | Recorded cloud coverage |
+| Length of Day_Light | Daylight-duration measurement |
 
----
+Additional calendar-based features are derived from the timestamps during preprocessing.
 
-## 🛠 Technologies Used
+**Data quality:** The original dataset contained eight missing timestamps and one exact duplicate timestamp record. These records were removed, and the remaining observations were sorted chronologically.
 
-| Category | Tools and Libraries |
-|---|---|
-| Programming Language | Python |
-| Data Processing | Pandas, NumPy |
-| Data Visualization | Matplotlib, Seaborn |
-| Machine Learning | Scikit-learn |
-| Models | Linear Regression, Random Forest, Gradient Boosting |
-| Model Saving | Joblib |
-| Excel Processing | OpenPyXL |
+The time series also contains some irregular intervals, so observations should not be assumed to form a perfectly continuous 15-minute sequence.
 
----
+## 3. Technologies Used
 
-## 🔄 Project Workflow
+- **Python** — Programming language
+- **Pandas** — Data manipulation and preprocessing
+- **NumPy** — Numerical computation
+- **Matplotlib and Seaborn** — Data visualization
+- **Scikit-learn** — Machine learning and evaluation
+- **Google Colab / Jupyter Notebook** — Development environment
 
-```text
-Raw Solar and Weather Dataset
-              │
-              ▼
-Data Cleaning and Validation
-              │
-              ▼
-Datetime Processing
-              │
-              ▼
-Exploratory Data Analysis
-              │
-              ▼
-Time-Based Feature Engineering
-              │
-              ▼
-Lag and Rolling Features
-              │
-              ▼
-Chronological Train-Test Split
-              │
-              ▼
-Regression Model Training
-              │
-              ▼
-Model Evaluation and Comparison
-              │
-              ▼
-Best Model Selection
-              │
-              ▼
-Forecast Visualization and Insights
-```
+## 4. Methodology
 
----
+The project follows a structured machine learning workflow.
 
-## 🧹 Data Cleaning
+**Step 1: Data Loading**
 
-The preprocessing stage included:
+Import the Excel dataset and inspect its dimensions, columns, data types, and timestamp coverage.
 
-- Converting numeric columns stored as text into numeric values
-- Handling missing values using forward filling
-- Converting the `Time` column into datetime format
-- Clipping cloud coverage to the valid range of 0–100%
-- Removing rows affected by lag and rolling calculations
-- Saving a cleaned and processed dataset
+**Step 2: Exploratory Data Analysis**
 
-After preprocessing and feature engineering, the dataset contained:
+Examine the distributions and relationships among solar energy generation, weather variables, and temporal patterns.
 
-```text
-196,673 rows
-17 columns
-```
+**Step 3: Data Preprocessing**
 
----
+- Convert timestamps into datetime format.
+- Remove observations with missing timestamps.
+- Remove exact duplicate records.
+- Sort observations chronologically.
+- Prepare the dataset for modeling.
 
-## 🧠 Feature Engineering
+**Step 4: Feature Engineering**
 
-### Time-based features
+Extract relevant calendar information from timestamps and combine it with weather measurements to construct model inputs.
 
-- Year
-- Month
-- Day
-- Hour
-- Minute
+**Step 5: Chronological Train-Test Split**
 
-### Lag features
+Divide the observations into earlier training data and later testing data, rather than randomly shuffling the time series.
 
-| Feature | Meaning |
-|---|---|
-| Lag_1 | Energy output 15 minutes earlier |
-| Lag_4 | Energy output 1 hour earlier |
-| Lag_96 | Energy output 24 hours earlier |
+This provides a more appropriate evaluation for temporally ordered observations.
 
-### Rolling features
+**Step 6: Model Development**
 
-| Feature | Meaning |
-|---|---|
-| Rolling_4 | Average energy during the previous hour |
-| Rolling_96 | Average energy during the previous 24 hours |
-
-These features help the models learn daily cycles, short-term changes, and repeating solar-production patterns.
-
----
-
-## ⏳ Time-Series Train-Test Split
-
-The dataset was split chronologically rather than randomly.
-
-```text
-First 80% of observations → Training data
-Last 20% of observations  → Testing data
-```
-
-This prevents future data from leaking into the training set and better represents real forecasting conditions.
-
----
-
-## 🤖 Machine Learning Models
-
-The following regression models were trained and compared:
+Train and compare two supervised regression algorithms:
 
 - Linear Regression
-- Random Forest Regressor
-- Gradient Boosting Regressor
+- Random Forest Regression
 
----
+A training-mean baseline is also evaluated to provide a simple reference point.
 
-## 📈 Model Performance
+**Step 7: Model Evaluation**
 
-| Model | MAE | RMSE | R² | MAPE |
+Evaluate prediction accuracy using:
+
+- R² (Coefficient of Determination)
+- Mean Absolute Error (MAE)
+- Mean Squared Error (MSE)
+- Root Mean Squared Error (RMSE)
+
+**Step 8: Prediction Analysis**
+
+Examine actual versus predicted values, residual errors, and model feature importance.
+
+**Step 9: January 2026 Scenario**
+
+Generate a hypothetical energy estimate using assumptions derived from historical weather conditions.
+
+This is a scenario analysis, not a verified forecast of actual January 2026 generation.
+
+## 5. Model Performance
+
+The following results were obtained on the chronological holdout test set.
+
+| Model | R² | MAE (Wh) | MSE (Wh²) | RMSE (Wh) |
 |---|---:|---:|---:|---:|
-| Linear Regression | 114.21 | 230.94 | 0.9513 | 1741.79% |
-| **Random Forest** | **79.54** | **208.87** | **0.9602** | **85.88%** |
-| Gradient Boosting | 89.11 | 215.87 | 0.9575 | 338.70% |
+| Training-mean baseline | -0.0008 | 765.1099 | 1,096,383 | 1047.0831 |
+| Linear Regression | 0.8249 | 262.1231 | 191,850.1 | 438.0070 |
+| **Random Forest** | **0.9011** | **131.6503** | **108,375.9** | **329.2050** |
 
----
+### Best Model: Random Forest Regression
 
-## 🏆 Best Model
+Random Forest achieved the strongest predictive performance among the evaluated machine learning models.
 
-The **Random Forest Regressor** achieved the strongest overall performance.
+Key findings:
 
-```text
-MAE: 79.54 Wh
-RMSE: 208.87 Wh
-R²: 0.9602
-```
+- **R² of 0.9011:** Approximately 90.11% of the variation in held-out solar energy observations was explained by the model.
+- **MAE of 131.65 Wh:** The average absolute prediction error was approximately 131.65 Wh.
+- **RMSE of 329.21 Wh:** Random Forest achieved the lowest root mean squared error.
+- **24.8% lower RMSE** compared with Linear Regression.
+- **68.6% lower RMSE** compared with the training-mean baseline.
 
-The model explains approximately **96.02% of the variation** in solar energy output.
+These findings indicate that Random Forest captures relationships in the observed data more effectively than the linear model.
 
-The MAPE values are less reliable because the dataset contains many zero-energy observations, particularly during nighttime periods. For this reason, MAE, RMSE, and R² are more useful for evaluating this project.
+## 6. Visualizations and Analysis
 
----
+The notebook includes exploratory and model-evaluation visualizations to support interpretation of the dataset and prediction results.
 
-## 📊 Actual vs Predicted Energy
+The analysis covers:
 
-![Actual vs Predicted](images/actual_vs_predicted.png)
+- Historical solar energy and weather patterns
+- Relationships among input variables
+- Actual versus predicted solar energy values
+- Prediction errors and residuals
+- Model performance comparison
+- Random Forest feature importance
 
-The forecast closely follows the observed energy-production pattern, including changing levels of solar output over time.
+## 7. January 2026 Scenario Analysis
 
----
+The project includes a hypothetical January 2026 solar energy estimation exercise based on historical January weather assumptions.
 
-## 📈 Solar Energy Forecast
+**Important distinction:** The dataset ends in August 2022. Actual January 2026 weather observations are not available in the historical training dataset.
 
-![Solar Forecast](images/solar_forecast.png)
+Therefore, the January 2026 estimates represent model-generated outcomes under assumed weather conditions rather than independently validated future forecasts.
 
-This chart compares actual and predicted solar-energy output across the test period.
+A real operational forecasting system would require appropriate future weather forecasts, a clearly defined forecast horizon, and further time-series validation.
 
----
+## 8. How to Run the Project
 
-## ⭐ Feature Importance
+### Option 1: Google Colab
 
-![Feature Importance](images/feature_importance.png)
+1. Open [Google Colab](https://colab.research.google.com/).
+2. Upload `Solar_Energy_Forecasting.ipynb`.
+3. Run the notebook cells in sequence.
+4. Upload the original Excel dataset when prompted.
+5. Review the generated visualizations, evaluation metrics, and scenario results.
 
-The feature-importance analysis shows which weather, time, and historical-energy variables contribute most strongly to the Random Forest predictions.
+### Option 2: Local Jupyter Notebook
 
-Typical high-impact variables include:
-
-- Sunlight Intensity
-- Recent Energy Output
-- Rolling Energy Averages
-- Hour of Day
-- Cloud Coverage
-- Daylight Length
-
----
-
-## 💡 Key Insights
-
-- Solar-energy production is strongly influenced by sunlight intensity.
-- Recent production values are highly useful for short-term forecasting.
-- Rolling averages help capture daily and hourly trends.
-- Cloud coverage generally reduces solar output.
-- Daylight duration and hour of day help explain seasonal and intraday variation.
-- Random Forest performs better than Linear Regression because it captures nonlinear relationships between weather and energy production.
-
----
-
-## 🏭 Business and Operational Applications
-
-This forecasting system can support:
-
-- Battery-storage scheduling
-- Energy-demand planning
-- Grid-balancing decisions
-- Backup-power preparation
-- Renewable-energy capacity management
-- Maintenance and operational planning
-
-More accurate forecasts can help energy operators reduce waste and improve reliability.
-
----
-
-## 📁 Repository Structure
-
-```text
-Solar-Energy-Forecasting/
-│
-├── data/
-│   └── solar_weather.xlsx
-│
-├── images/
-│   ├── actual_vs_predicted.png
-│   ├── feature_importance.png
-│   └── solar_forecast.png
-│
-├── models/
-│   └── best_solar_model.pkl
-│
-├── notebooks/
-│
-├── processed_data/
-│   └── processed_solar_dataset.csv
-│
-├── results/
-│   ├── model_comparison.csv
-│   ├── feature_importance.csv
-│   └── final_metrics.csv
-│
-├── src/
-│   └── solar_energy_prediction.py
-│
-├── README.md
-├── requirements.txt
-├── LICENSE
-└── .gitignore
-```
-
----
-
-## 🚀 Installation and Usage
-
-Clone the repository:
+Install the required Python packages:
 
 ```bash
-git clone https://github.com/gopyka17-oss/Solar-Energy-Forecasting.git
+pip install pandas numpy matplotlib seaborn scikit-learn openpyxl jupyter
 ```
 
-Move into the project folder:
+Launch Jupyter:
 
 ```bash
-cd Solar-Energy-Forecasting
+jupyter notebook
 ```
 
-Install the required packages:
+Open the notebook and adjust the dataset-loading step if necessary to point to your local Excel file.
 
-```bash
-pip install -r requirements.txt
-```
+## 9. Limitations
 
-Run the forecasting script:
+Although Random Forest achieved promising results, several limitations should be considered.
 
-```bash
-python src/solar_energy_prediction.py
-```
+1. **Weather input availability:** The evaluation uses recorded weather measurements. Operational future forecasting would require weather predictions or inputs available at the intended prediction time.
+2. **Historical coverage:** The dataset covers January 2017 to August 2022, limiting conclusions about more recent conditions.
+3. **Temporal irregularities:** The dataset contains some missing intervals and irregular timestamp gaps.
+4. **Model generalization:** Performance on one chronological holdout does not guarantee equivalent accuracy across all seasons or future years.
+5. **Scenario uncertainty:** The January 2026 analysis is based on historical assumptions rather than actual future meteorological observations.
 
----
+## 10. Future Improvements
 
-## 📁 Generated Outputs
+Potential extensions include:
 
-The project generates:
+- Walk-forward or rolling-origin time-series validation
+- Hyperparameter optimization
+- Gradient Boosting and XGBoost comparisons
+- Weather forecast integration
+- Timestamp-aware lag and rolling-window features
+- Seasonal error analysis
+- Model explainability using SHAP
+- A dashboard for visualizing solar energy estimates
 
-- Processed solar dataset
-- Model-comparison results
-- Final model metrics
-- Feature-importance data
-- Actual-vs-predicted visualization
-- Solar forecast visualization
-- Saved Random Forest model
+These are proposed improvements and are not claimed as implemented features of the current notebook.
 
----
+## 11. Conclusion
 
-## 🎯 Skills Demonstrated
+This project demonstrates the application of supervised machine learning to solar energy estimation using historical weather and temporal data.
 
-- Time-Series Data Analysis
-- Data Cleaning
-- Datetime Processing
-- Feature Engineering
-- Lag Features
-- Rolling Statistics
-- Regression Modelling
-- Chronological Validation
-- Model Evaluation
-- Forecast Visualization
-- Renewable Energy Analytics
-- Python Programming
+Random Forest Regression outperformed Linear Regression and the training-mean baseline, achieving an R² score of **0.9011** and an RMSE of **329.21 Wh** on the chronological holdout dataset.
+
+The findings highlight the potential of nonlinear ensemble methods for modeling relationships between environmental conditions and solar energy generation, while also emphasizing the importance of temporal evaluation and careful interpretation of future prediction scenarios.
 
 ---
 
-## 🔮 Future Improvements
+## Author
 
-- Add XGBoost and LightGBM regressors
-- Use time-series cross-validation
-- Add prediction intervals
-- Include recent weather data
-- Build a Streamlit solar forecasting dashboard
-- Add a 24-hour production forecast
-- Deploy the dashboard online
-- Compare against ARIMA, Prophet, and LSTM models
+**Gopika P**
 
----
-
-## 👩‍💻 Author
-
-**Gopika Prasanna**  
 MSc Data Science & Analytics  
-Aspiring Data Analyst / Data Scientist  
+Mahatma Gandhi University, Kerala, India
 
-Skills: Python • SQL • R • Machine Learning • Data Analytics
+**GitHub:** [gopyka17-oss](https://github.com/gopyka17-oss)
+
+**LinkedIn:** [Gopika P](https://www.linkedin.com/in/gopika-p-2b97a1351/)
 
 ---
 
-⭐ If you found this project useful, consider giving it a star.
+*Project focus: Machine Learning · Regression · Renewable Energy Analytics · Data Science · Temporal Evaluation*
